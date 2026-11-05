@@ -1,18 +1,7 @@
 package values;
 
-import java.util.Objects;
-import java.util.stream.IntStream;
-
-/**
- * Value Object CPF com regras de validação conforme Object Calisthenics:
- * - Imutabilidade
- * - Sem a palavra-chave ELSE
- * - Apenas um nível de indentação por método (uso de streams funcionais)
- * - Métodos validarCPF() e getDigitos()
- */
-public final class CPF {
-
-    private final String digitos;
+public class CPF {
+    private String digitos;
 
     public CPF(String valor) {
         String apenasDigitos = extrairDigitos(valor);
@@ -27,19 +16,19 @@ public final class CPF {
     }
 
     public static boolean validarCPF(String cpf) {
-        String numeros = extrairDigitos(cpf);
-        if (numeros.length() != 11) {
+        String nums = extrairDigitos(cpf);
+        if (nums.length() != 11) {
             return false;
         }
-        if (temDigitosIguais(numeros)) {
+        if (nums.chars().distinct().count() == 1) {
             return false;
         }
-        int primeiroDigito = calcularDigito(numeros, 10);
-        if (primeiroDigito != (numeros.charAt(9) - '0')) {
+        int digito1 = calcularDigito(nums, 10);
+        if (digito1 != (nums.charAt(9) - '0')) {
             return false;
         }
-        int segundoDigito = calcularDigito(numeros, 11);
-        return segundoDigito == (numeros.charAt(10) - '0');
+        int digito2 = calcularDigito(nums, 11);
+        return digito2 == (nums.charAt(10) - '0');
     }
 
     public String getDigitos() {
@@ -61,29 +50,13 @@ public final class CPF {
         return valor.replaceAll("\\D", "");
     }
 
-    private static boolean temDigitosIguais(String digitos) {
-        return digitos.chars().distinct().count() == 1;
-    }
-
-    private static int calcularDigito(String digitos, int pesoInicial) {
-        int soma = IntStream.range(0, pesoInicial - 1)
-                .map(indice -> (digitos.charAt(indice) - '0') * (pesoInicial - indice))
-                .sum();
+    private static int calcularDigito(String nums, int peso) {
+        int soma = 0;
+        for (int i = 0; i < peso - 1; i++) {
+            soma += (nums.charAt(i) - '0') * (peso - i);
+        }
         int resto = 11 - (soma % 11);
         return (resto > 9) ? 0 : resto;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CPF cpf = (CPF) o;
-        return Objects.equals(digitos, cpf.digitos);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(digitos);
     }
 
     @Override
