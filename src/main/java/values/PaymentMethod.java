@@ -11,15 +11,15 @@ public class PaymentMethod {
     public static final String DEBIT_CARD_STR = "CARTAO_DEBITO";
     public static final String CASH_STR = "DINHEIRO";
 
+    private static final List<String> VALID_METHODS = Arrays.asList(
+            PIX_STR, BANK_SLIP_STR, CREDIT_CARD_STR, DEBIT_CARD_STR, CASH_STR
+    );
+
     public static final PaymentMethod PIX = new PaymentMethod(PIX_STR);
     public static final PaymentMethod BANK_SLIP = new PaymentMethod(BANK_SLIP_STR);
     public static final PaymentMethod CREDIT_CARD = new PaymentMethod(CREDIT_CARD_STR);
     public static final PaymentMethod DEBIT_CARD = new PaymentMethod(DEBIT_CARD_STR);
     public static final PaymentMethod CASH = new PaymentMethod(CASH_STR);
-
-    private static final List<String> VALID_METHODS = Arrays.asList(
-            PIX_STR, BANK_SLIP_STR, CREDIT_CARD_STR, DEBIT_CARD_STR, CASH_STR
-    );
 
     private final String value;
 

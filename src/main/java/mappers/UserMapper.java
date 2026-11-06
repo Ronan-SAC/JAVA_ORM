@@ -23,18 +23,14 @@ public class UserMapper implements Mapper<User> {
             String birthDate = rs.getString("birth_date");
 
             Address address;
-            try {
-                String street = getColumnOrNull(rs, "street", "rua");
-                String number = getColumnOrNull(rs, "number", "numero");
-                String neighborhood = getColumnOrNull(rs, "neighborhood", "bairro");
-                String zipCode = getColumnOrNull(rs, "zip_code", "cep");
+            String street = getColumnOrNull(rs, "street", "rua");
+            String number = getColumnOrNull(rs, "number", "numero");
+            String neighborhood = getColumnOrNull(rs, "neighborhood", "bairro");
+            String zipCode = getColumnOrNull(rs, "zip_code", "cep");
 
-                if (street != null && number != null && neighborhood != null && zipCode != null) {
-                    address = new Address(street, number, neighborhood, zipCode);
-                } else {
-                    address = extractAddressFallback(rs);
-                }
-            } catch (SQLException e) {
+            if (street != null && number != null && neighborhood != null && zipCode != null) {
+                address = new Address(street, number, neighborhood, zipCode);
+            } else {
                 address = extractAddressFallback(rs);
             }
 

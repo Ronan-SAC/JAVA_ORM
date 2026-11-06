@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Database {
-    private String url = "jdbc:postgresql://localhost:5433/java";
+    private String url = "jdbc:postgresql://localhost:5433/store";
     private String user = "java";
     private String password = "java";
 
