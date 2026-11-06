@@ -4,6 +4,6 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 
 public interface Mapper<T> {
-    T paraEntidade(ResultSet rs);
-    HashMap<String, Object> paraMap(T objeto);
+    T toEntity(ResultSet rs);
+    HashMap<String, Object> toMap(T object);
 }

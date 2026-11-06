@@ -1,9 +1,8 @@
-import entitys.Usuario;
-import tables.UsuarioTable;
-import values.CPF;
-import values.Email;
-import values.Endereco;
-import values.Telefone;
+import entities.Purchase;
+import entities.User;
+import tables.PurchaseTable;
+import tables.UserTable;
+import values.*;
 
 import java.util.List;
 
@@ -12,61 +11,98 @@ public class Main {
         System.out.println("=== 1. Testando Value Objects (Object Calisthenics) ===");
 
         Email email = new Email("contato@exemplo.com.br");
-        System.out.println("Email: " + email + " | Válido: " + email.validarEmail());
+        System.out.println("Email: " + email + " | Válido: " + email.validate());
 
-        CPF cpf = new CPF("529.982.247-25");
-        System.out.println("CPF Formatado: " + cpf + " | Apenas dígitos: " + cpf.getDigitos() + " | Válido: " + cpf.validarCPF());
+        Cpf cpf = new Cpf("529.982.247-25");
+        System.out.println("CPF Formatado: " + cpf + " | Apenas dígitos: " + cpf.getDigits() + " | Válido: " + cpf.validate());
 
-        Telefone telefone = new Telefone("(11) 98765-4321");
-        System.out.println("Telefone: " + telefone + " | DDD: " + telefone.getDDD() + " | Válido: " + telefone.validarTelefone());
+        Phone phone = new Phone("(11) 98765-4321");
+        System.out.println("Telefone: " + phone + " | DDD: " + phone.getAreaCode() + " | Válido: " + phone.validate());
 
-        Endereco endereco = new Endereco("Avenida Paulista", "1578", "Bela Vista", "01310-200");
-        System.out.println("Endereço: " + endereco);
-        System.out.println("Rua: " + endereco.getRua() + ", Bairro: " + endereco.getBairro() + ", Número: " + endereco.getNumero() + ", CEP: " + endereco.getCEP() + " | Válido: " + endereco.validarCEP());
+        Address address = new Address("Avenida Paulista", "1578", "Bela Vista", "01310-200");
+        System.out.println("Endereço: " + address);
+        System.out.println("Rua: " + address.getStreet() + ", Bairro: " + address.getNeighborhood() + ", Número: " + address.getNumber() + ", CEP: " + address.getZipCode() + " | Válido: " + address.validateZipCode());
 
-        System.out.println("\n=== 2. Operações de CRUD com UsuarioTable (Baseado em db-java) ===");
+        System.out.println("\n=== 2. Operações de CRUD com UserTable ===");
 
-        UsuarioTable tabela = new UsuarioTable();
+        UserTable userTable = new UserTable();
 
-        // 1. Criar tabela caso não exista
-        tabela.criarTabelaSeNaoExistir();
-
-        // 2. CREATE (Inserir)
-        Usuario novoUsuario = new Usuario(
+        User newUser = new User(
                 "Carlos Silva",
                 cpf,
                 email,
-                telefone,
+                phone,
                 "1995-03-20",
-                endereco
+                address
         );
 
         System.out.println("\n[CRUD: Create] Inserindo usuário...");
-        tabela.salvar(novoUsuario);
+        userTable.save(newUser);
 
-        // 3. READ (Listar Todos)
         System.out.println("\n[CRUD: Read] Listando todos os usuários:");
-        List<Usuario> lista = tabela.listar();
-        for (Usuario u : lista) {
+        List<User> list = userTable.list();
+        for (User u : list) {
             System.out.println(" - " + u);
         }
 
-        // 4. READ (Buscar por Id ou CPF)
-        if (!lista.isEmpty()) {
-            int id = lista.get(0).getId();
-            System.out.println("\n[CRUD: Read] Buscando usuário pelo ID " + id + ":");
-            Usuario encontrado = tabela.buscarPorId(id);
-            System.out.println("Encontrado: " + encontrado);
+        if (!list.isEmpty()) {
+            int id = list.get(0).getId();
+            System.out.println("\n[CRUD: Read - get_id com Inner Join] Buscando usuário pelo ID " + id + ":");
+            User foundById = userTable.get_id(id);
+            System.out.println("Encontrado com get_id: " + foundById);
+            if (foundById != null && foundById.getAddress() != null) {
+                System.out.println("Endereço carregado via Inner Join: " + foundById.getAddress());
+            }
 
-            // 5. UPDATE (Atualizar)
+            System.out.println("\n[CRUD: Read - find com Inner Join] Buscando usuário pelo ID " + id + ":");
+            User foundWithFind = userTable.find(id);
+            System.out.println("Encontrado com find: " + foundWithFind);
+
             System.out.println("\n[CRUD: Update] Atualizando telefone e nome...");
-            encontrado.setNome("Carlos Silva Atualizado");
-            encontrado.setTelefone(new Telefone("(11) 91234-5678"));
-            tabela.atualizar(encontrado, id);
+            foundById.setName("Carlos Silva Atualizado");
+            foundById.setPhone(new Phone("(11) 91234-5678"));
+            userTable.update(foundById, id);
+        }
 
-            // 6. DELETE (Deletar)
+        System.out.println("\n=== 3. Operações com a Tabela Purchases (ORM PurchaseTable & Purchase) ===");
+
+        PurchaseTable purchaseTable = new PurchaseTable();
+
+        User buyerUser = !list.isEmpty() ? list.get(0) : newUser;
+        Purchase purchase = new Purchase(buyerUser);
+
+        System.out.println("\n[Compra: Adicionar Produtos]");
+        purchase.addProduct("Notebook Gamer", 1, 4500.00);
+        purchase.addProduct("Mouse Gamer", 2, 150.00);
+        purchase.addProduct("Suporte Articulado", 1, 200.00);
+        System.out.println("Produtos no carrinho: " + purchase.getProduct());
+        System.out.println("Quantidade total de itens: " + purchase.getQuantity());
+        System.out.println("Valor total: R$ " + String.format("%.2f", purchase.getTotalAmount()));
+
+        System.out.println("\n[Compra: Remover Produto]");
+        purchase.removeProduct("Suporte Articulado");
+        System.out.println("Produtos após remoção: " + purchase.getProduct());
+        System.out.println("Quantidade total: " + purchase.getQuantity());
+        System.out.println("Valor total atualizado: R$ " + String.format("%.2f", purchase.getTotalAmount()));
+
+        System.out.println("\n[Compra: Finalizar Compra]");
+        purchase.completePurchase(PaymentMethod.PIX);
+        System.out.println("Status da compra: " + purchase.getStatus());
+        System.out.println("Forma de pagamento: " + purchase.getPaymentMethod().getDescription());
+
+        System.out.println("\n[CRUD Purchases: Salvar]");
+        purchaseTable.save(purchase);
+
+        System.out.println("\n[CRUD Purchases: Listar]");
+        List<Purchase> dbPurchases = purchaseTable.list();
+        for (Purchase p : dbPurchases) {
+            System.out.println(" - " + p);
+        }
+
+        if (!list.isEmpty()) {
+            int id = list.get(0).getId();
             System.out.println("\n[CRUD: Delete] Deletando usuário ID " + id + "...");
-            tabela.deletar(id);
+            userTable.delete(id);
             System.out.println("Deletado com sucesso!");
         }
 
